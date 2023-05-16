@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Point of Sale</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        #pos-container {
+            margin-top: 20px;
+        }
+        
+        h2 {
+            margin-top: 0;
+        }
+        
+        #product-list {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .product-item {
+            width: 200px;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .product-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        #custom-item {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #custom-item label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        #custom-item input[type="text"],
+        #custom-item input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        #add-custom-item {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #add-custom-item:hover {
+            background-color: #45a049;
+        }
+        
+        #cart {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #cart h2 {
+            margin-top: 0;
+        }
+        
+        #cart table {
+            width: 100%;
+        }
+        
+        #cart table th,
+        #cart table td {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        #cart table th {
+            text-align: left;
+        }
+        
+        #total {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        #checkout-btn {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #checkout-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Point of Sale</h1>
+    
+    <div id="pos-container">
+        <h2>Product List</h2>
+        <div id="product-list">
+            <div class="product-item" data-product="Product 1" data-price="10.99">Product 1 ($10.99)</div>
+            <div class="product-item" data-product="Product 2" data-price="15.99">Product 2 ($15.99)</div>
+            <div class="product-item" data-product="Product 3" data-price="7.99">Product 3 ($7.99)</div>
+            <!-- Add more preselectable product items as needed -->
+        </div>
+        
+        <div id="custom-item">
+            <h2>Add Custom Item</h2>
+            <label for="item-name">Item Name:</label>
+            <input type="text" id="item-name" placeholder="Enter item name">
+            
+            <label for="item-price">Item Price:</label>
+            <input type="number" id="item-price" step="0.01" placeholder="Enter item price">
+            
+            <button id="add-custom-item">Add to Cart</button>
+        </div>
+        
+        <div id="cart">
+            <h2>Cart</h2>
+            <table id="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Cart items will be dynamically added here -->
+                </tbody>
+            </table>
+            
+            <div id="total">
+                Total: $0.00
+            </div>
+            
+            <button id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+    
+    <script src="pos.js"></script>
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+  // JavaScript code for handling the POS functionality
+
+// Add event listeners to product items
+var productItems = document.getElementsByClassName("product-item");
+for (var i = 0; i < productItems.length; i++) {
+    productItems[i].addEventListener("click", addToCart);
+}
+
+// Function to add a product to the cart
+function addToCart() {
+    var product = this.dataset.product;
+    var price = parseFloat(this.dataset.price);
+    
+    var cartTable = document.getElementById("cart-table");
+    var cartRow = document.createElement("tr");
+    
+    var productCell = document.createElement("td");
+    productCell.textContent = product;
+    
+    var priceCell = document.createElement("td");
+    priceCell.textContent = "$" + price.toFixed(2);
+    
+    cartRow.appendChild(productCell);
+    cartRow.appendChild(priceCell);
+    cartTable.querySelector("tbody").appendChild(cartRow);
+    
+    updateTotal();
+}
+
+// Function to update the total price
+function updateTotal() {
+    var cartItems = document.querySelectorAll("#cart-table tbody tr");
+    var total = 0;
+    
+    for (var i = 0; i < cartItems.length; i++) {
+        var price = parseFloat(cartItems[i].querySelector("td:last-child").textContent.slice(1));
+        total += price;
+    }
+    
+    var totalElement = document.getElementById("total");
+    totalElement.textContent = "Total: $" + total.toFixed(2);
+}
+
+// Function to export cart as .xls file
+function exportCartToXLS() {
+    var cartItems = document.querySelectorAll("#cart-table tbody tr");
+    
+    // Create a new workbook
+    var workbook = XLSX.utils.book_new();
+    
+    // Create a new worksheet
+    var worksheet = XLSX.utils.table_to_sheet(document.getElementById("cart-table"));
+    
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Cart");
+    
+    // Generate the .xls file
+    var xlsFile = XLSX.write(workbook, { bookType: "xls", type: "array" });
+    
+    // Save the file
+    var date = new Date().toISOString().slice(0, 10);
+    var filename = "cart_" + date + ".xls";
+    
+    var a = document.createElement("a");
+    var blob = new Blob([xlsFile], { type: "application/vnd.ms-excel" });
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Add event listener to the "Checkout" button
+var checkoutButton = document.getElementById("checkout-btn");
+checkoutButton.addEventListener("click", exportCartToXLS);
+
+  </script>
+</body>
+</html>
