@@ -1,29 +1,106 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Election</title>
-        <style>
-            #canidate1{
-                color: #134e17;
+<head>
+    <title>QR Code Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #f1f1f1;
+        }
+        #container {
+            text-align: center;
+            margin-top: 50px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        #contentSelect {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        #contentInput {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 20px;
+            width: 100%;
+            outline: 2px solid #4CAF50;
+        }
+        button {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3e8e41;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>QR Code Generator</h1>
+        <select id="contentSelect">
+            <option value="url">URL</option>
+            <option value="phone">Phone Number</option>
+            <option value="email">Email</option>
+            <option value="text">Text</option>
+        </select>
+        <input type="text" id="contentInput" placeholder="Enter Content">
+        <button onclick="generateQRCode()">Generate</button>
+        <div id="result"></div>
+    </div>
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script>
+        function generateQRCode() {
+            var contentSelect = document.getElementById('contentSelect');
+            var contentType = contentSelect.value;
+            var contentInput = document.getElementById('contentInput');
+            var content = contentInput.value;
+            var qrContainer = document.getElementById('result');
+            qrContainer.innerHTML = '';
+
+            if (content) {
+                var qrCode = new QRCode(qrContainer, {
+                    text: generateContentString(contentType, content),
+                    width: 200,
+                    height: 200
+                });
             }
-             #canidate2{
-                color: #5d2977;
+        }
+
+        function generateContentString(type, content) {
+            if (type === 'url') {
+                return 'https://' + content;
+            } else if (type === 'phone') {
+                return 'tel:' + content;
+            } else if (type === 'email') {
+                return 'mailto:' + content;
+            } else if (type === 'text') {
+                return content;
             }
-        </style>
-    </head>
-    <body>
-<h1>Canidates<br> <span id="canidate1">Canidate #1</span> vs. <span id="canidate2">Canidate #2 </span>
-</h1>
-<button><a href="https://docs.google.com/forms/d/e/1FAIpQLSdwSLvV8Fd6zTtkPP3qNpacw33nslOBskMLP9REFv8aycZJmA/viewform?usp=sf_link">Vote Here</a></button>
-<script>
-    // document.body
-        var headingEl = document.getElementById("canidate2");
-        console.log(headingEl);
-        headingEl.innerHTML = "Lorelei";
-         var headingEl = document.getElementById("canidate1");
-        console.log(headingEl);
-        headingEl.innerHTML = "Clayton";
-</script>
-    </body>
-</html>
+        }
+    </script>
+</body>
